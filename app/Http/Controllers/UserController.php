@@ -70,36 +70,4 @@ class UserController extends Controller
             return $this->handleException($e);
         }
     }
-
-    public function csvCreate(){
-        $headers = array(
-            "Content-type" => "text/csv",
-        );
-
-        $users = User::select(
-            'users.name',
-            'users.email',
-        )
-        ->get();
-
-        $columns = array(
-            'Name',
-            'Email',
-        );
-
-        $callback = function () use ($users, $columns) {
-            $file = fopen('export.csv', 'w');
-            fputcsv($file, $columns);
-
-            foreach ($users as $user) {
-                fputcsv($file, array(
-                    $user->name,
-                    $user->email
-                ));
-            }
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
-    }
 }

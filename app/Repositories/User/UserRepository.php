@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Http\Resources\User as UserResource;
 use App\Http\Resources\UserCollection;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 
 class UserRepository implements UserRepositoryInterface
@@ -47,8 +48,8 @@ class UserRepository implements UserRepositoryInterface
     {
         $user =  Auth::user();
         if ($user != null) {
-            $detail =  new UserResource($user);
-            return $this->response->sendResponse(true, "User details.", $detail,  $this->response::SUCCESS_STATUS_CODE);
+            $detail =  (new UserResource($user))->additional(['success' => 'true','message'=>"User detail"]);;
+            return $detail;
         }
         $data['message'] = "User details not found.";
         return $this->response->sendResponse(false,  $data['message'], [],  $this->response::NOTFOUND_STATUS_CODE);
@@ -56,10 +57,10 @@ class UserRepository implements UserRepositoryInterface
 
     public function all()
     {
-        $users =  User::all();
+        $users =  User::paginate(5);
         if ($users->isNotEmpty()) {
-            $userList =  new UserCollection($users);
-            return $this->response->sendResponse(true, "User details.", $userList,  $this->response::SUCCESS_STATUS_CODE);
+            $userList =  (new UserCollection($users))->additional(['success' => 'true','message'=>"User list"]);
+            return $userList;
         }
         $data['message'] = "No record found.";
         return $this->response->sendResponse(false,  $data['message'], [],  $this->response::NOTFOUND_STATUS_CODE);
